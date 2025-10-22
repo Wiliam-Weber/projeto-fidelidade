@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programa de Fidelidade</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+        <h1>Meu Programa de Fidelidade</h1>
+        
+        <section class="status-card">
+            <h2>Olá, <span id="nome-cliente">Wiliam</span>!</h2>
+            <div class="status-info">
+                <div>
+                    Tier Atual: 
+                    <strong id="tier-cliente" class="tier-silver">Silver</strong>
+                </div>
+                <div>
+                    Pontos Atuais: 
+                    <strong id="pontos-cliente">0</strong>
+                </div>
+            </div>
+            <p id="tier-meta">Faltam 800 pontos para o tier Gold.</p>
+        </section>
+
+        <section class="card">
+            <h2>Registrar Nova Compra</h2>
+            <div class="form-group">
+                <label for="valor-compra">Valor da Compra (R$):</label>
+                <input type="text" id="valor-compra" placeholder="Ex: 120.50">
+            </div>
+            <button id="btn-registrar-compra">Registrar Compra</button>
+            <p id="erro-compra" class="erro-msg"></p>
+        </section>
+        
+        <section class="card">
+            <h2>Ações do Sistema</h2>
+            <p>Simule a passagem do tempo para verificar a expiração dos pontos.</p>
+            <button id="btn-expirar-pontos">Verificar Pontos Expirados</button>
+        </section>
+
+        <section class="card">
+            <h2>Histórico de Pontos</h2>
+            <ul id="historico-pontos">
+                </ul>
+        </section>
+
+    </main>
+    
+    <footer>
+        <p>Desenvolvido por: Wiliam Mateus Weber</p>
+        <p></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
