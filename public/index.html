@@ -8,22 +8,35 @@
 </head>
 <body>
 
-    <main class="container">
-        <h1>Meu Programa de Fidelidade</h1>
+    <div id="tela-login" class="container">
+        <section class="card">
+            <h1>Programa de Fidelidade</h1>
+            <p>Digite seu nome para acessar ou se cadastrar.</p>
+            <div class="form-group">
+                <label for="nome-login">Seu Nome:</label>
+                <input type="text" id="nome-login" placeholder="Ex: Wiliam Weber">
+            </div>
+            <button id="btn-login">Acessar / Cadastrar</button>
+            <p id="erro-login" class="erro-msg"></p>
+        </section>
+    </div>
+
+    <main id="tela-principal" class="container" style="display: none;">
         
         <section class="status-card">
-            <h2>Olá, <span id="nome-cliente">Wiliam</span>!</h2>
+            <h2>Olá, <span id="nome-cliente"></span>!</h2>
             <div class="status-info">
                 <div>
                     Tier Atual: 
-                    <strong id="tier-cliente" class="tier-silver">Silver</strong>
+                    <strong id="tier-cliente" class="tier-silver"></strong>
                 </div>
                 <div>
                     Pontos Atuais: 
                     <strong id="pontos-cliente">0</strong>
                 </div>
             </div>
-            <p id="tier-meta">Faltam 800 pontos para o tier Gold.</p>
+            <p id="tier-meta"></p>
+            <button id="btn-logout" class="btn-logout">Sair (Trocar Usuário)</button>
         </section>
 
         <section class="card">
@@ -37,22 +50,39 @@
         </section>
         
         <section class="card">
-            <h2>Ações do Sistema</h2>
-            <p>Simule a passagem do tempo para verificar a expiração dos pontos.</p>
-            <button id="btn-expirar-pontos">Verificar Pontos Expirados</button>
+            <h2>Resgatar Pontos</h2>
+            <div class="form-group">
+                <label for="produto-resgate">Produto/Serviço:</label>
+                <input type="text" id="produto-resgate" placeholder="Ex: Desconto 10%">
+            </div>
+            <div class="form-group">
+                <label for="pontos-resgate">Pontos Necessários:</label>
+                <input type="text" id="pontos-resgate" placeholder="Ex: 200">
+            </div>
+            <button id="btn-resgatar-pontos" class="btn-troca">Resgatar</button>
+            <p id="erro-resgate" class="erro-msg"></p>
         </section>
 
         <section class="card">
-            <h2>Histórico de Pontos</h2>
+            <h2>Histórico de Transações</h2>
             <ul id="historico-pontos">
                 </ul>
         </section>
 
-    </main>
+        <section id="relogio-expiracao" class="relogio-card">
+            <h3>Simulador de Expiração</h3>
+            <p>Pontos expiram em 365 dias. Clique abaixo "zerar" o tempo.</p>
+            <button id="btn-simular-expiracao">Avançar Tempo (Demo)</button>
+            <p id="info-simulacao" class="info-msg"></p>
+        </section>
+        </main>
     
     <footer>
-        <p>Desenvolvido por: Wiliam Mateus Weber</p>
-        <p></p>
+        <p class="desenvolvedor">
+            Desenvolvido por: Wiliam Mateus Weber | Curso: Sistemas de Informação
+        </p>
+        <p class="aviso-ia">
+            </p>
     </footer>
 
     <script src="app.js"></script>

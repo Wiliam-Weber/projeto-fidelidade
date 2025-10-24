@@ -1,4 +1,3 @@
-
 const REGRAS = {
     PONTUACAO: {
         TAXA_NORMAL: 1,
@@ -11,101 +10,87 @@ const REGRAS = {
     VALIDADE_PONTOS_DIAS: 365,
 };
 
-
-/**
- * @param {string} input 
- * @returns {{success: boolean, value: number, message: string}}
- */
 const validarEntradaCompra = (input) => {
-
     if (input === undefined || input === null) {
         return { success: false, value: 0, message: "Valor inválido." };
     }
-    
     const valorLimpo = String(input).trim().replace(',', '.');
     const valorNum = parseFloat(valorLimpo);
-
     if (isNaN(valorNum)) {
         return { success: false, value: 0, message: "Valor inválido. Por favor, insira um número." };
     }
     if (valorNum <= 0) {
         return { success: false, value: 0, message: "O valor da compra deve ser positivo." };
     }
-    
     return { success: true, value: valorNum, message: "" };
 };
+const validarEntradaTroca = (produto, pontos) => {
+    const produtoLimpo = produto.trim();
+    if (produtoLimpo.length < 3) {
+        return { success: false, produto: "", pontos: 0, message: "Nome do produto/serviço inválido." };
+    }
+    const pontosNum = parseInt(pontos, 10);
+    if (isNaN(pontosNum) || pontosNum <= 0) {
+        return { success: false, produto: "", pontos: 0, message: "Pontos necessários devem ser um número positivo." };
+    }
+    return { success: true, produto: produtoLimpo, pontos: pontosNum, message: "" };
+};
 
-
-/**
- * @param {number} valorCompra
- * @param {string} tier
- * @returns {number}
- */
 const calcularPontos = (valorCompra, tier) => {
-    const taxa = (tier === REGRAS.TIERS.GOLD.nome)
-        ? REGRAS.PONTUACAO.TAXA_GOLD
-        : REGRAS.PONTUACAO.TAXA_NORMAL;
+    const taxa = (tier === REGRAS.TIERS.GOLD.nome) ? REGRAS.PONTUACAO.TAXA_GOLD : REGRAS.PONTUACAO.TAXA_NORMAL;
     return Math.floor(valorCompra * taxa);
 };
 
 /**
  * @param {Array} historicoAtual
- * @param {number} pontosGanhos
- * @param {Date} dataCompra
+ * @param {number} pontos 
+ * @param {Date} data
+ * @param {string} tipo 
+ * @param {string} descricao 
  * @returns {Array} 
  */
-const adicionarEntradaNoHistorico = (historicoAtual, pontosGanhos, dataCompra) => {
-    const dataExpiracao = new Date(dataCompra.getTime());
-    dataExpiracao.setDate(dataExpiracao.getDate() + REGRAS.VALIDADE_PONTOS_DIAS);
-
+const adicionarEntradaNoHistorico = (historicoAtual, pontos, data, tipo = 'Ganho', descricao = '') => {
+    const dataExpiracao = (pontos > 0) ? new Date(data.getTime()) : null;
+    if (dataExpiracao) {
+        dataExpiracao.setDate(dataExpiracao.getDate() + REGRAS.VALIDADE_PONTOS_DIAS);
+    }
     const novaEntrada = {
         id: Date.now(),
-        pontos: pontosGanhos,
-        dataEntrada: dataCompra,
+        pontos: pontos,
+        tipo: tipo,
+        descricao: descricao,
+        dataEntrada: data,
         dataExpiracao: dataExpiracao,
         expirado: false,
     };
-    
     return [...historicoAtual, novaEntrada];
 };
 
-/**
- * @param {Array} historicoPontos
- * @returns {number}
- */
 const calcularSaldoTotal = (historicoPontos) => {
-    return historicoPontos.reduce((total, entrada) => {
+
+    const totalBruto = historicoPontos.reduce((total, entrada) => {
+        if (entrada.tipo === 'Troca') {
+            return total + entrada.pontos;
+        }
         return total + (entrada.expirado ? 0 : entrada.pontos);
     }, 0);
+    return Math.max(0, totalBruto);
 };
 
-/**
- * @param {Array} historicoAtual
- * @param {Date} dataVerificacao
- * @returns {Array} 
- */
 const verificarExpiracao = (historicoAtual, dataVerificacao) => {
- 
-    return historicoAtual.map(entrada => {
-        const estaExpirado = dataVerificacao > entrada.dataExpiracao;
 
+    return historicoAtual.map(entrada => {
+        if (entrada.tipo !== 'Ganho' || !entrada.dataExpiracao) {
+            return entrada;
+        }
+        const estaExpirado = dataVerificacao > entrada.dataExpiracao;
         if (estaExpirado === entrada.expirado) {
             return entrada;
         }
-        
-        return {
-            ...entrada,
-            expirado: estaExpirado,
-        };
+        return { ...entrada, expirado: estaExpirado };
     });
 };
 
-/**
-
- * @param {number} saldoPontos
- * @param {string} tierAtual
- * @returns {string} 
- */
 const atualizarTier = (saldoPontos, tierAtual) => {
 
     if (saldoPontos >= REGRAS.TIERS.GOLD.meta) {
@@ -116,20 +101,14 @@ const atualizarTier = (saldoPontos, tierAtual) => {
     }
     return tierAtual;
 };
-
-
-/**
- * @param {object} estadoAtual
- * @param {number} valorCompra
- * @param {Date} dataCompra
- * @returns {object} 
- */
 const processarCompra = (estadoAtual, valorCompra, dataCompra) => {
     const pontosGanhos = calcularPontos(valorCompra, estadoAtual.tier);
     const novoHistorico = adicionarEntradaNoHistorico(
         estadoAtual.historicoPontos,
         pontosGanhos,
-        dataCompra
+        dataCompra,
+        'Ganho',
+        `Compra de R$ ${valorCompra.toFixed(2)}` 
     );
     const novoSaldo = calcularSaldoTotal(novoHistorico);
     const novoTier = atualizarTier(novoSaldo, estadoAtual.tier);
@@ -142,14 +121,31 @@ const processarCompra = (estadoAtual, valorCompra, dataCompra) => {
     };
 };
 
-/**
+const processarTroca = (estadoAtual, produto, pontosNecessarios) => {
 
- * @param {object} estadoAtual
- * @param {Date} dataVerificacao
- * @returns {object} 
- */
+    const saldoAtualCalculado = calcularSaldoTotal(estadoAtual.historicoPontos);
+    if (saldoAtualCalculado < pontosNecessarios) {
+        return { novoEstado: estadoAtual, erro: "Pontos insuficientes para esta troca." };
+    }
+    const novoHistorico = adicionarEntradaNoHistorico(
+        estadoAtual.historicoPontos,
+        -pontosNecessarios,
+        new Date(),
+        'Troca',
+        produto 
+    );
+    const novoSaldo = calcularSaldoTotal(novoHistorico);
+    const novoTier = atualizarTier(novoSaldo, estadoAtual.tier);
+    const novoEstado = {
+        ...estadoAtual,
+        tier: novoTier,
+        pontos: novoSaldo,
+        historicoPontos: novoHistorico,
+    };
+    return { novoEstado: novoEstado, erro: null };
+};
+
 const processarExpiracao = (estadoAtual, dataVerificacao) => {
-
     const historicoVerificado = verificarExpiracao(
         estadoAtual.historicoPontos,
         dataVerificacao
@@ -165,10 +161,11 @@ const processarExpiracao = (estadoAtual, dataVerificacao) => {
     };
 };
 
-
 module.exports = {
     REGRAS,
     validarEntradaCompra,
+    validarEntradaTroca,
     processarCompra,
+    processarTroca,
     processarExpiracao
-}
+};
