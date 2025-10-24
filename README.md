@@ -2,7 +2,7 @@
 
 Este projeto é uma aplicação web full-stack **multi-usuário** que simula um programa de fidelidade. O **núcleo da lógica de negócio** foi implementado no backend (Node.js) utilizando conceitos de **Programação Funcional (PF)**.
 
-- **Desenvolvido por:** [@seu-usuario-github] Wiliam Mateus Weber
+- **Desenvolvido por:** Wiliam Mateus Weber
 - **Curso:** Sistemas de Informação
 
 ## 1. Visão Geral
